@@ -1,5 +1,7 @@
 """Tests for the User entity."""
 
+from uuid import UUID
+
 from forging_web_user_manager.models.email import Email
 from forging_web_user_manager.models.user import User
 from forging_web_user_manager.errors.user_name_empty_error import UserNameEmptyError
@@ -61,24 +63,18 @@ def test_update_email_with_valid_email_returns_ok():
     assert result.value.email == new_email
     assert user.email == new_email
 
+def test_user_has_uuid_on_construction():
+    """User generates a UUIDv7 id on construction."""
+    email = Email("alice@example.com")
+    user = User("Alice", email)
 
-def test_assign_id_sets_non_none_non_empty_string():
-    """assign_id() sets a non-None, non-empty string id."""
-    user = User("Alice", Email("alice@example.com"))
-
-    user.assign_id()
-
-    assert user.id is not None
-    assert isinstance(user.id, str)
-    assert len(user.id) > 0
+    assert isinstance(user.id, UUID)
+    assert user.id.version == 7
 
 
-def test_assign_id_generates_unique_ids():
-    """assign_id() generates unique ids for different users."""
+def test_user_ids_are_unique():
+    """Each user gets a unique id on construction."""
     user1 = User("Alice", Email("alice@example.com"))
     user2 = User("Bob", Email("bob@example.com"))
-
-    user1.assign_id()
-    user2.assign_id()
 
     assert user1.id != user2.id
