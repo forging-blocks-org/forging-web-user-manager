@@ -13,7 +13,7 @@ def client() -> TestClient:
     return TestClient(app)
 
 
-class TestCreateUser:
+class TestRegisterUser:
     """Tests for POST /users."""
 
     def test_creates_user_and_returns_201(self, client: TestClient):
@@ -70,7 +70,7 @@ class TestGetUser:
 
     def test_returns_404_for_nonexistent_user(self, client: TestClient):
         """GET /users/{user_id} should return 404 for a non-existent user."""
-        response = client.get("/users/nonexistent-id")
+        response = client.get("/users/00000000-0000-7000-8000-000000000000")
 
         assert response.status_code == 404
 
@@ -124,7 +124,7 @@ class TestUpdateUser:
     def test_returns_404_for_nonexistent_user(self, client: TestClient):
         """PUT /users/{user_id} with a non-existent id should return 404."""
         response = client.put(
-            "/users/nonexistent-id",
+            "/users/00000000-0000-7000-8000-000000000000",
             json={"name": "Ghost"},
         )
 
@@ -148,6 +148,6 @@ class TestDeleteUser:
 
     def test_returns_404_for_nonexistent_user(self, client: TestClient):
         """DELETE /users/{user_id} should return 404 for a non-existent user."""
-        response = client.delete("/users/nonexistent-id")
+        response = client.delete("/users/00000000-0000-7000-8000-000000000000")
 
         assert response.status_code == 404

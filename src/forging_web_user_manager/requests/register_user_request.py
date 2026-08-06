@@ -1,9 +1,9 @@
-"""Request DTO for creating a user."""
+"""Request DTO for registering a user."""
 
 from dataclasses import dataclass
 
 
 @dataclass
-class CreateUserRequest:
+class RegisterUserRequest:
     name: str
     email: str

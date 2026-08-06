@@ -1,6 +1,6 @@
 """Tests for DeleteUserUseCase."""
 
-from typing import cast
+from uuid import UUID
 
 import pytest
 
@@ -29,10 +29,10 @@ async def test_delete_existing_user_returns_ok_none(
     use_case: DeleteUserUseCase,
 ) -> None:
     user = User(name="Alice", email=Email("alice@example.com"))
-    user.assign_id()
     await repo.save(user)
+    assert user.id is not None
 
-    request = DeleteUserRequest(user_id=cast(str, user.id))
+    request = DeleteUserRequest(user_id=user.id)
     result = await use_case.execute(request)
 
     assert result.is_ok
@@ -43,13 +43,13 @@ async def test_delete_existing_user_returns_ok_none(
 async def test_delete_non_existent_user_returns_err(
     use_case: DeleteUserUseCase,
 ) -> None:
-    request = DeleteUserRequest(user_id="nonexistent")
+    request = DeleteUserRequest(user_id=UUID("00000000-0000-7000-8000-000000000000"))
 
     result = await use_case.execute(request)
 
     assert result.is_err
     assert isinstance(result.error, UserNotFoundError)
-    assert "nonexistent" in result.error.message.value
+    assert "00000000-0000-7000-8000-000000000000" in result.error.message.value
 
 
 @pytest.mark.asyncio
@@ -58,11 +58,11 @@ async def test_deleted_user_is_no_longer_retrievable(
     use_case: DeleteUserUseCase,
 ) -> None:
     user = User(name="Alice", email=Email("alice@example.com"))
-    user.assign_id()
     await repo.save(user)
 
-    delete_request = DeleteUserRequest(user_id=cast(str, user.id))
+    assert user.id is not None
+    delete_request = DeleteUserRequest(user_id=user.id)
     await use_case.execute(delete_request)
 
-    retrieved = await repo.get_by_id(cast(str, user.id))
+    retrieved = await repo.get_by_id(user.id)
     assert retrieved is None

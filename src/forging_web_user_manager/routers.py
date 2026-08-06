@@ -1,14 +1,15 @@
 """FastAPI router with user CRUD endpoints."""
 
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from forging_web_user_manager.pipelined_use_case import PipelinedUseCase
-from forging_web_user_manager.schemas.user_create_request import UserCreateRequest
+from forging_web_user_manager.schemas.user_register_request import UserRegisterRequest
 from forging_web_user_manager.schemas.user_response import UserResponse
 from forging_web_user_manager.schemas.user_update_request import UserUpdateRequest
-from forging_web_user_manager.requests.create_user_request import CreateUserRequest as CreateUserDTO
+from forging_web_user_manager.requests.register_user_request import RegisterUserRequest as RegisterUserDTO
 from forging_web_user_manager.requests.delete_user_request import DeleteUserRequest
 from forging_web_user_manager.requests.get_user_request import GetUserRequest
 from forging_web_user_manager.requests.update_user_request import UpdateUserRequest
@@ -16,7 +17,7 @@ from forging_web_user_manager.requests.update_user_request import UpdateUserRequ
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-def _get_create_usecase() -> PipelinedUseCase[CreateUserDTO, Any]:
+def _get_register_usecase() -> PipelinedUseCase[RegisterUserDTO, Any]:
     raise NotImplementedError("Wired at startup")
 
 
@@ -37,12 +38,12 @@ def _get_delete_usecase() -> PipelinedUseCase[DeleteUserRequest, Any]:
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
-async def create_user(
-    body: UserCreateRequest,
-    usecase: PipelinedUseCase[CreateUserDTO, Any] = Depends(_get_create_usecase),
+async def register_user(
+    body: UserRegisterRequest,
+    usecase: PipelinedUseCase[RegisterUserDTO, Any] = Depends(_get_register_usecase),
 ) -> UserResponse:
-    """Create a new user."""
-    result = await usecase.execute(CreateUserDTO(name=body.name, email=body.email))
+    """Register a new user."""
+    result = await usecase.execute(RegisterUserDTO(name=body.name, email=body.email))
     if result.is_err:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(result.error.message.value))
     return UserResponse.from_dto(result.value)
@@ -50,7 +51,7 @@ async def create_user(
 
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
-    user_id: str,
+    user_id: UUID,
     usecase: PipelinedUseCase[GetUserRequest, Any] = Depends(_get_get_usecase),
 ) -> UserResponse:
     """Get a user by ID."""
@@ -73,7 +74,7 @@ async def list_users(
 
 @router.put("/{user_id}", response_model=UserResponse)
 async def update_user(
-    user_id: str,
+    user_id: UUID,
     body: UserUpdateRequest,
     usecase: PipelinedUseCase[UpdateUserRequest, Any] = Depends(_get_update_usecase),
 ) -> UserResponse:
@@ -87,7 +88,7 @@ async def update_user(
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
-    user_id: str,
+    user_id: UUID,
     usecase: PipelinedUseCase[DeleteUserRequest, Any] = Depends(_get_delete_usecase),
 ) -> None:
     """Delete a user by ID."""

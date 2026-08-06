@@ -1,6 +1,6 @@
 """Tests for UpdateUserUseCase."""
 
-from typing import cast
+from uuid import UUID
 
 import pytest
 
@@ -30,7 +30,6 @@ async def _create_and_save_user(
     repo: InMemoryUserRepository, name: str = "Alice", email: str = "alice@example.com"
 ) -> User:
     user = User(name=name, email=Email(email))
-    user.assign_id()
     await repo.save(user)
     return user
 
@@ -41,8 +40,9 @@ async def test_update_existing_user_name_returns_ok_with_updated_user(
     use_case: UpdateUserUseCase,
 ) -> None:
     user = await _create_and_save_user(repo)
+    assert user.id is not None
 
-    request = UpdateUserRequest(user_id=cast(str, user.id), name="Alice Updated")
+    request = UpdateUserRequest(user_id=user.id, name="Alice Updated")
     result = await use_case.execute(request)
 
     assert result.is_ok
@@ -58,8 +58,9 @@ async def test_update_existing_user_email_returns_ok_with_updated_user(
     use_case: UpdateUserUseCase,
 ) -> None:
     user = await _create_and_save_user(repo)
+    assert user.id is not None
 
-    request = UpdateUserRequest(user_id=cast(str, user.id), email="alice.new@example.com")
+    request = UpdateUserRequest(user_id=user.id, email="alice.new@example.com")
     result = await use_case.execute(request)
 
     assert result.is_ok
@@ -73,13 +74,13 @@ async def test_update_existing_user_email_returns_ok_with_updated_user(
 async def test_update_non_existent_user_returns_err(
     use_case: UpdateUserUseCase,
 ) -> None:
-    request = UpdateUserRequest(user_id="nonexistent", name="New Name")
+    request = UpdateUserRequest(user_id=UUID("00000000-0000-7000-8000-000000000000"), name="New Name")
 
     result = await use_case.execute(request)
 
     assert result.is_err
     assert isinstance(result.error, UserNotFoundError)
-    assert "nonexistent" in result.error.message.value
+    assert "00000000-0000-7000-8000-000000000000" in result.error.message.value
 
 
 @pytest.mark.asyncio
@@ -88,8 +89,9 @@ async def test_update_with_empty_name_returns_err(
     use_case: UpdateUserUseCase,
 ) -> None:
     user = await _create_and_save_user(repo)
+    assert user.id is not None
 
-    request = UpdateUserRequest(user_id=cast(str, user.id), name="")
+    request = UpdateUserRequest(user_id=user.id, name="")
     result = await use_case.execute(request)
 
     assert result.is_err
@@ -103,8 +105,9 @@ async def test_update_with_invalid_email_returns_err(
     use_case: UpdateUserUseCase,
 ) -> None:
     user = await _create_and_save_user(repo)
+    assert user.id is not None
 
-    request = UpdateUserRequest(user_id=cast(str, user.id), email="bademail")
+    request = UpdateUserRequest(user_id=user.id, email="bademail")
     result = await use_case.execute(request)
 
     assert result.is_err

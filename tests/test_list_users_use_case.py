@@ -1,6 +1,5 @@
 """Tests for ListUsersUseCase."""
 
-from typing import cast
 import pytest
 
 
@@ -37,11 +36,9 @@ async def test_list_users_after_creating_users_returns_all_users(
     use_case: ListUsersUseCase,
 ) -> None:
     alice = User(name="Alice", email=Email("alice@example.com"))
-    alice.assign_id()
     await repo.save(alice)
 
     bob = User(name="Bob", email=Email("bob@example.com"))
-    bob.assign_id()
     await repo.save(bob)
 
     result = await use_case.execute()
@@ -51,5 +48,5 @@ async def test_list_users_after_creating_users_returns_all_users(
     assert isinstance(users, list)
     assert len(users) == 2
     assert all(isinstance(u, UserResponse) for u in users)
-    assert any(u.id == cast(str, alice.id) for u in users)
-    assert any(u.id == cast(str, bob.id) for u in users)
+    assert any(u.id == alice.id for u in users)
+    assert any(u.id == bob.id for u in users)

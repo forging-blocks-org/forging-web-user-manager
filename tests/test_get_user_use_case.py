@@ -1,6 +1,6 @@
 """Tests for GetUserUseCase."""
 
-from typing import cast
+from uuid import UUID
 
 import pytest
 
@@ -30,15 +30,15 @@ async def test_get_existing_user_returns_ok_with_user(
     use_case: GetUserUseCase,
 ) -> None:
     user = User(name="Alice", email=Email("alice@example.com"))
-    user.assign_id()
     await repo.save(user)
+    assert user.id is not None
 
-    request = GetUserRequest(user_id=cast(str, user.id))
+    request = GetUserRequest(user_id=user.id)
     result = await use_case.execute(request)
 
     assert result.is_ok
     assert isinstance(result.value, UserResponse)
-    assert result.value.id == cast(str, user.id)
+    assert result.value.id == user.id
     assert result.value.name == "Alice"
 
 
@@ -46,10 +46,10 @@ async def test_get_existing_user_returns_ok_with_user(
 async def test_get_non_existent_user_returns_err(
     use_case: GetUserUseCase,
 ) -> None:
-    request = GetUserRequest(user_id="nonexistent")
+    request = GetUserRequest(user_id=UUID("00000000-0000-7000-8000-000000000000"))
 
     result = await use_case.execute(request)
 
     assert result.is_err
     assert isinstance(result.error, UserNotFoundError)
-    assert "nonexistent" in result.error.message.value
+    assert "00000000-0000-7000-8000-000000000000" in result.error.message.value

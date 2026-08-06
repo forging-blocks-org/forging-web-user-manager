@@ -1,5 +1,7 @@
 """Response body for user endpoints."""
 
+from uuid import UUID
+
 from pydantic import BaseModel
 
 from forging_web_user_manager.responses.user_response import UserResponse as UserResponseDTO
@@ -8,7 +10,7 @@ from forging_web_user_manager.responses.user_response import UserResponse as Use
 class UserResponse(BaseModel):
     """Response body for user endpoints."""
 
-    id: str
+    id: UUID
     name: str
     email: str
 

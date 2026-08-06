@@ -1,6 +1,7 @@
 """Tests for InMemoryUserRepository."""
 
 import pytest
+from uuid import UUID
 
 from forging_blocks.infrastructure import RepositoryNotFoundError
 
@@ -19,7 +20,6 @@ def repo() -> InMemoryUserRepository:
 def user() -> User:
     """Return a User with an assigned ID, ready to save."""
     u = User("Alice", Email("alice@example.com"))
-    u.assign_id()
     return u
 
 
@@ -54,7 +54,7 @@ async def test_get_by_id_returns_none_for_non_existent_id(
     repo: InMemoryUserRepository,
 ):
     """get_by_id() returns None when no user has the given ID."""
-    result = await repo.get_by_id("nonexistent-id")
+    result = await repo.get_by_id(UUID("00000000-0000-7000-8000-000000000000"))
 
     assert result is None
 
@@ -77,7 +77,7 @@ async def test_delete_by_id_raises_repository_not_found_error_for_non_existent_i
 ):
     """delete_by_id() raises RepositoryNotFoundError when the ID does not exist."""
     with pytest.raises(RepositoryNotFoundError):
-        await repo.delete_by_id("nonexistent-id")
+        await repo.delete_by_id(UUID("00000000-0000-7000-8000-000000000000"))
 
 
 @pytest.mark.asyncio
@@ -86,9 +86,7 @@ async def test_list_all_returns_all_saved_users(
 ):
     """list_all() returns every user that has been saved."""
     user1 = User("Alice", Email("alice@example.com"))
-    user1.assign_id()
     user2 = User("Bob", Email("bob@example.com"))
-    user2.assign_id()
     await repo.save(user1)
     await repo.save(user2)
 
