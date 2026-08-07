@@ -1,2 +1,3 @@
-def main() -> None:
-    print("Hello from forging-web-user-manager!")
+from forging_web_user_manager.main import main
+
+__all__ = ["main"]
