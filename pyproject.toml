@@ -18,6 +18,7 @@ dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.25",
     "httpx>=0.28",
+    "pytest-cov>=6.0",
 ]
 
 [project.scripts]
@@ -26,3 +27,18 @@ forging-web-user-manager = "forging_web_user_manager:main"
 [build-system]
 requires = ["uv_build>=0.9.18,<0.10.0"]
 build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+addopts = "--cov=forging_web_user_manager --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["forging_web_user_manager"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "class .*\\b(Protocol)\\b:",
+    "@(abc\\.)?abstractmethod",
+]
